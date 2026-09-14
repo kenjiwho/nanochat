@@ -8,8 +8,11 @@ source .venv/bin/activate
 python -m nanochat.dataset -n 5
 # train and evaluate tokenizer on downloaded data
 python -m scripts.tok_train --vocab-size 8192
-python -m scripts.tok_eval
+python -m scripts.tok_eval > our_runs/output.txt 2>/dev/null
+python -m our_runs.tok_insight_eval our_runs/output.txt
+
 
 python -m scripts.tok_train --vocab-size 32768
-python -m scripts.tok_eval
+python -m scripts.tok_eval > our_runs/output2.txt 2>/dev/null
+python -m our_runs.tok_insight_eval our_runs/output2.txt
 
