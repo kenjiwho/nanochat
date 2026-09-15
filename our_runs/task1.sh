@@ -1,7 +1,7 @@
 # setup environment
 command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
 [ -d ".venv" ] || uv venv
-uv sync --extra gpu
+uv sync --extra gpu --group dev
 source .venv/bin/activate
 
 # download 500MB of data

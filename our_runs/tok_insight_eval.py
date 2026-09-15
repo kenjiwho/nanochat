@@ -157,10 +157,10 @@ all_text = [
 tokenizer = get_tokenizer()
 
 with open(OUT_FILE, "a", encoding="utf-8") as f:
-    for (type, text) in all_text:
+    for (text_type, text) in all_text:
         encode = tokenizer.encode(text)
 
-        f.write(f"\n\n{type}###############################\n\n")
+        f.write(f"\n\n{text_type}###############################\n\n")
 
         tokens = []
         for token in encode:
@@ -180,3 +180,12 @@ with open(OUT_FILE, "a", encoding="utf-8") as f:
             f.write("\n\n")
             f.write("original decode:\n")
             f.write(token_str_orig)
+
+        if text_type == "news":
+            encoded_bytes = text.encode('utf-8')
+            f.write("\n\n")
+            f.write(str(encoded_bytes)+"\n")
+            f.write(f'bytes: {len(encoded_bytes)}\n')
+            f.write(f'charecters: {len(text)}\n')
+            f.write(f'tokens: {len(encode)}\n')
+            f.write(f'ratio: {len(encode) / len(text)}\n')
