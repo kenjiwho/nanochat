@@ -11,6 +11,9 @@ If you are only on CPU/Macbook, you'll want to train a much much smaller LLM. Ex
 python -m scripts.base_train --depth=4 --max-seq-len=512 --device-batch-size=1 --eval-tokens=512 --core-metric-every=-1 --total-batch-size=512 --num-iterations=20
 """
 
+with open("our_runs/hyperparams.txt", "w") as f:
+    f.write("")
+
 import os
 os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
 import gc
@@ -138,6 +141,10 @@ def build_model_meta(depth):
         n_layer=depth, n_head=num_heads, n_kv_head=num_heads, n_embd=model_dim,
         window_pattern=args.window_pattern,
     )
+
+    with open("our_runs/hyperparams.txt", "a") as f:
+        f.write(f"depth: {depth}\nbase_dim: {base_dim}\nmodel_dim: {model_dim}\nnum_heads: {num_heads}\n")
+
     with torch.device("meta"):
         model_meta = GPT(config)
     return model_meta
@@ -251,9 +258,17 @@ model = torch.compile(model, dynamic=False) # the inputs to model will never cha
 # Get the parameter counts of our model
 param_counts = model.num_scaling_params()
 print0(f"Parameter counts:")
+
+with open("our_runs/hyperparams.txt", "a") as f:
+    f.write(f"parameter counts: {param_counts}\n")
+
 for key, value in param_counts.items():
     print0(f"{key:24s}: {value:,}")
 num_params = param_counts['total']
+
+with open("our_runs/hyperparams.txt", "a") as f:
+    f.write(f"num_params: {num_params}\n")
+
 num_flops_per_token = model.estimate_flops()
 print0(f"Estimated FLOPs per token: {num_flops_per_token:e}")
 
@@ -330,6 +345,7 @@ if scaler is not None:
 dataloader_resume_state_dict = None if not resuming else meta_data["dataloader_state_dict"]
 train_loader = tokenizing_distributed_data_loader_with_state_bos_bestfit(tokenizer, args.device_batch_size, args.max_seq_len, split="train", device=device, resume_state_dict=dataloader_resume_state_dict)
 build_val_loader = lambda: tokenizing_distributed_data_loader_bos_bestfit(tokenizer, args.device_batch_size, args.max_seq_len, split="val", device=device)
+build_test_loader = lambda: tokenizing_distributed_data_loader_bos_bestfit(tokenizer, args.device_batch_size, args.max_seq_len, split="train", device=device)
 x, y, dataloader_state_dict = next(train_loader) # kick off load of the very first batch of data
 
 # -----------------------------------------------------------------------------
@@ -353,6 +369,10 @@ else:
     raise ValueError("No training horizon specified")
 total_tokens = total_batch_size * num_iterations # the actual number of tokens we will train for
 print0(f"Total number of training tokens: {total_tokens:,}")
+
+with open("our_runs/hyperparams.txt", "a") as f:
+        f.write(f"training tokens: {total_tokens}\n")
+
 print0(f"Tokens : Scaling params ratio: {total_batch_size * num_iterations / num_scaling_params:.2f}") # e.g. Chinchilla was ~20
 print0(f"Total training FLOPs estimate: {num_flops_per_token * total_tokens:e}")
 
@@ -392,6 +412,7 @@ def get_weight_decay(it):
 if not resuming:
     step = 0
     val_bpb = None # will be set if eval_every > 0
+    test_bpb = None
     min_val_bpb = float("inf")
     smooth_train_loss = 0 # EMA of training loss
     total_training_time = 0 # total wall-clock time of training
@@ -421,9 +442,11 @@ while True:
     if args.eval_every > 0 and (last_step or step % args.eval_every == 0):
         model.eval()
         val_loader = build_val_loader()
+        test_loader = build_test_loader()
         eval_steps = args.eval_tokens // (args.device_batch_size * args.max_seq_len * ddp_world_size)
         with disable_fp8(model):
             val_bpb = evaluate_bpb(model, val_loader, eval_steps, token_bytes)
+            test_bpb = evaluate_bpb(model, test_loader, eval_steps, token_bytes)
         print0(f"Step {step:05d} | Validation bpb: {val_bpb:.6f}")
         if val_bpb < min_val_bpb:
             min_val_bpb = val_bpb
@@ -432,6 +455,7 @@ while True:
             "total_training_flops": flops_so_far,
             "total_training_time": total_training_time,
             "val/bpb": val_bpb,
+            "test/bpb": test_bpb,
         })
         model.train()
 
