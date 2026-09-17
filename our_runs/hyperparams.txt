@@ -1,0 +1,22 @@
+depth: 2
+base_dim: 128
+model_dim: 128
+num_heads: 1
+depth: 2
+base_dim: 128
+model_dim: 128
+num_heads: 1
+parameter counts: {'wte': 4194304, 'value_embeds': 4194304, 'lm_head': 4194304, 'transformer_matrices': 393228, 'scalars': 30, 'total': 12976170}
+num_params: 12976170
+depth: 12
+base_dim: 768
+model_dim: 768
+num_heads: 6
+training tokens: 36700160
+parameter counts: {'wte': 4194304, 'value_embeds': 4194304, 'lm_head': 4194304, 'transformer_matrices': 393228, 'scalars': 30, 'total': 12976170}
+num_params: 12976170
+depth: 12
+base_dim: 768
+model_dim: 768
+num_heads: 6
+training tokens: 36700160
