@@ -1,10 +1,21 @@
-export OMP_NUM_THREADS=1
+# # when using gpu ==================
+# export OMP_NUM_THREADS=1
+
+# # setup environment
+# command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+# [ -d ".venv" ] || uv venv
+# uv sync --extra gpu --group dev
+# source .venv/bin/activate
+
+# when using cpu ==================
+export OMP_NUM_THREADS=8
 
 # setup environment
 command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
 [ -d ".venv" ] || uv venv
-uv sync --extra gpu --group dev
+uv sync
 source .venv/bin/activate
+uv pip install setuptools
 
 # -----------------------------------------------------------------------------
 # # wandb setup
@@ -13,7 +24,7 @@ source .venv/bin/activate
 # #    `wandb login`
 # # 2) Set the WANDB_RUN environment variable when running this script, e.g.:
 # #    `WANDB_RUN=d26 bash speedrun.sh`
-WANDB_RUN=task3_run1
+WANDB_RUN=task3_run2
 if [ -z "$WANDB_RUN" ]; then
     # by default use "dummy" : it's handled as a special case, skips logging to wandb
     WANDB_RUN=dummy
@@ -25,6 +36,11 @@ export PYTORCH_ALLOC_CONF=expandable_segments:True
 # torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft_mid -- --run=$WANDB_RUN
 # torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i stage1 -a "ARC-Easy|ARC-Challenge|GSM8K"
 
-# sft
-torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft -- --run=$WANDB_RUN
-# torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-Challenge|GSM8K"
+# # sft
+# # when using gpu
+# torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft -- --run=$WANDB_RUN
+# # torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-Challenge|GSM8K"
+
+# when using cpu
+python3 -m scripts.chat_sft --run=$WANDB_RUN
+# torchrun --standalone --nproc_per_node=1 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-C
