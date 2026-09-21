@@ -22,9 +22,9 @@ fi
 export PYTORCH_ALLOC_CONF=expandable_segments:True
 
 # mid-learning
-torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft_mid -- --run=$WANDB_RUN
-torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-Challenge|GSM-8K"
+# torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft_mid -- --run=$WANDB_RUN
+# torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i stage1 -a "ARC-Easy|ARC-Challenge|GSM8K"
 
 # sft
 torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft -- --run=$WANDB_RUN
-torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-Challenge|GSM-8K"
+# torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-Challenge|GSM8K"
