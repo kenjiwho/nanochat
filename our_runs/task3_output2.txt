@@ -1,1 +1,8 @@
-Autodetected device type: cuda
+Final: 602/2376 (25.34%)
+ARC-Easy accuracy: 25.34%
+Final: 267/1172 (22.78%)
+ARC-Challenge accuracy: 22.78%
+Rank 0 | 0/1319 (0.00%)
+==================================================
+Final: 0/1319 (0.00%)
+GSM8K accuracy: 0.00%
