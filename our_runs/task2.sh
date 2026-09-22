@@ -13,7 +13,7 @@ source .venv/bin/activate
 # #    `wandb login`
 # # 2) Set the WANDB_RUN environment variable when running this script, e.g.:
 # #    `WANDB_RUN=d26 bash speedrun.sh`
-WANDB_RUN=gpu_run2
+WANDB_RUN=gpu_run3
 if [ -z "$WANDB_RUN" ]; then
     # by default use "dummy" : it's handled as a special case, skips logging to wandb
     WANDB_RUN=dummy
@@ -27,9 +27,9 @@ python -m nanochat.dataset -n 5
 
 # pre-train transformer
 # torchrun --standalone --nproc_per_node=8 -m scripts.base_train -- --depth=2 --save-every=100 --eval-every=100 --target-param-data-ratio=8 --device-batch-size=16 --run=$WANDB_RUN --total-batch-size=122880
-torchrun --standalone --nproc_per_node=2 -m scripts.base_train -- --depth=2 --save-every=100 --eval-every=10 --target-param-data-ratio=8 --device-batch-size=1 --run=$WANDB_RUN --window-pattern=L
-
+# torchrun --standalone --nproc_per_node=1 -m scripts.base_train -- --depth=2 --save-every=100 --eval-every=10 --target-param-data-ratio=8 --device-batch-size=16 --run=$WANDB_RUN --window-pattern=L
+python -m scripts.base_train --depth=2 --save-every=100 --eval-every=10 --device-batch-size=16 --run=$WANDB_RUN --window-pattern=L
 
 # evaluate the model: CORE metric, BPB on train/val, and draw samples
-torchrun --standalone --nproc_per_node=2 -m scripts.base_eval -- --device-batch-size=2
-
+# torchrun --standalone --nproc_per_node=1 -m scripts.base_eval -- --device-batch-size=16
+# python -m scripts.base_eval --device-batch-size=4
