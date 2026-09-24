@@ -7,12 +7,7 @@ uv sync --extra gpu --group dev
 source .venv/bin/activate
 
 # -----------------------------------------------------------------------------
-# # wandb setup
-# # If you wish to use wandb for logging (it's nice!, recommended).
-# # 1) Make sure to first log in to wandb, e.g. run:
-# #    `wandb login`
-# # 2) Set the WANDB_RUN environment variable when running this script, e.g.:
-# #    `WANDB_RUN=d26 bash speedrun.sh`
+# wandb setup
 WANDB_RUN=task3_run2
 if [ -z "$WANDB_RUN" ]; then
     # by default use "dummy" : it's handled as a special case, skips logging to wandb
@@ -25,7 +20,6 @@ export PYTORCH_ALLOC_CONF=expandable_segments:True
 torchrun --standalone --nproc_per_node=2 -m scripts.chat_sft_mid -- --run=$WANDB_RUN
 torchrun --standalone --nproc_per_node=2 -m scripts.chat_eval -- -i stage1 -a "ARC-Easy|ARC-Challenge|GSM8K"
 
-# # sft
-# when using gpu Using 1 gpu
+# sft using gpu Using 1 gpu
 torchrun --standalone --nproc_per_node=1 -m scripts.chat_sft -- --run=$WANDB_RUN --load-optimizer=0 --device-batch-size=16 #device batch size was 32
 torchrun --standalone --nproc_per_node=1 -m scripts.chat_eval -- -i sft -a "ARC-Easy|ARC-Challenge|GSM8K"
